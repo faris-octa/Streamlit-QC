@@ -112,13 +112,16 @@ def app():
                                     key='lot_to_remove')
 
             if sample != None and lot != None:
-                berat_sampel_kering = st.number_input("Berat sampel kering", format='%f')
                 df_selected = df[(df['nama_item'] == sample) & (df['LOT'] == lot)]
+                berat_sampel_kering = st.number_input("Berat sampel kering", format='%f')
+                if berat_sampel_kering > 0 :
+                    solid_content = round((berat_sampel_kering - float(df_selected['berat_wadah'])) / float(df_selected['berat_sampel_basah']) * 100, 2)
+                    st.text(f"nilai Solid Content: {solid_content}%")
             
             submitted = st.button("Submit")
             if submitted:
-                if sample != None and berat_sampel_kering > 0:
-                    solid_content = round((berat_sampel_kering - float(df_selected['berat_wadah'])) / float(df_selected['berat_sampel_basah']) * 100, 2)
+                if sample != None and solid_content > 0:
+                    # solid_content = round((berat_sampel_kering - float(df_selected['berat_wadah'])) / float(df_selected['berat_sampel_basah']) * 100, 2)
                     remaining_data = (berat_sampel_kering, solid_content, sample, lot)
                     query = '''UPDATE solid_contents 
                                 SET berat_sampel_kering = ?, 
@@ -126,8 +129,8 @@ def app():
                                     sc = ? 
                                 WHERE nama_item = ? AND LOT = ?'''
                     update_db(query, remaining_data)
-                    st.success(f'berhasil')
-                    time.sleep(1)
+                    st.success(f'berhasil memasukkan ke database')
+                    time.sleep(10)
                     st.experimental_rerun()
                 else:
                     st.error('silahkan isi form di atas terlebih dahulu')
