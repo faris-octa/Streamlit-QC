@@ -29,6 +29,15 @@ def main():
         logging.error(f"An error occurred when trying to display the page: {e}")
         st.error(f"An error occurred: {e}")
 
+    hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+
 if __name__ == "__main__":
     # Setup logging configuration
     logging.basicConfig(level=logging.INFO)
