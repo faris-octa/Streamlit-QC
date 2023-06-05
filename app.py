@@ -1,12 +1,16 @@
 import streamlit as st
 import sc
 import av
+import viskositas
+import totalAmine
 import logging
 
 # Dictionary mapping page names to modules
 PAGES = {
     "Solid Content": sc,
-    "Acid Value": av
+    "Acid Value": av,
+    "Viscosity": viskositas,
+    "Total Amine": totalAmine
 }
 
 def main():

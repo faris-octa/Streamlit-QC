@@ -121,7 +121,6 @@ def app():
             submitted = st.button("Submit")
             if submitted:
                 if sample != None and solid_content > 0:
-                    # solid_content = round((berat_sampel_kering - float(df_selected['berat_wadah'])) / float(df_selected['berat_sampel_basah']) * 100, 2)
                     remaining_data = (berat_sampel_kering, solid_content, sample, lot)
                     query = '''UPDATE solid_contents 
                                 SET berat_sampel_kering = ?, 
