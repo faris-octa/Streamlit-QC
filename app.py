@@ -36,7 +36,12 @@ def main():
     hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
+            footer {visibility: visible;}
+            footer:after{
+                content:'by Faris Octa';
+                display:block;
+                position:relative;
+            }
             header {visibility: hidden;}
             </style>
             """
