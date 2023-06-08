@@ -8,18 +8,6 @@ import logging
 # Database connection string
 conn = st.experimental_connection("qcdb", type="sql", autocommit=True)
 
-def update_db(query, data):
-    """
-    Updates data in the SQLite database based on the provided SQL query and data.
-    """
-    try:
-        with connect_to_db() as conn:
-            c = conn.cursor()
-            c.execute(query, data)
-    except Exception as e:
-        logging.error(f"An error occurred when trying to update data in the database: {e}")
-        st.error(f"An error occurred: {e}")
-
 def app():
     logging.info('Solid Content Page Started')
     st.title('Solid Content')
