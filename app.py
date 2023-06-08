@@ -33,9 +33,7 @@ def main():
         logging.error(f"An error occurred when trying to display the page: {e}")
         st.error(f"An error occurred: {e}")
 
-    conn = st.experimental_connection("qcdb", type="sql", autocommit=True)
-
-    hide_st_style = """
+        hide_st_style = """
             <style>
             #MainMenu {visibility: visible;}
             footer {visibility: visible;}
@@ -47,7 +45,7 @@ def main():
             header {visibility: visible;}
             </style>
             """
-    st.markdown(hide_st_style, unsafe_allow_html=True)
+    # st.markdown(hide_st_style, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     # Setup logging configuration

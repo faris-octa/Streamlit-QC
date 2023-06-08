@@ -99,14 +99,16 @@ def app():
             if submitted:
                 if sample != None and solid_content > 0:
                     remaining_data = (berat_sampel_kering, solid_content, sample, lot)
-                    query = '''UPDATE solid_contents 
-                                SET berat_sampel_kering = ?, 
-                                    timestamp2 = (strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')),
-                                    sc = ? 
-                                WHERE nama_item = ? AND LOT = ?'''
-                    update_db(query, remaining_data)
-                    st.success(f'berhasil memasukkan ke database')
-                    time.sleep(10)
+                    with conn.session as session:
+                        session.execute(text("""UPDATE solid_contents_test
+                                                SET berat_sampel_kering = :n1,
+                                                    timestamp2 = DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s'),
+                                                        sc = :n2
+                                                WHERE nama_item = :n3 AND LOT = :n4"""),
+                                        {"n1": berat_sampel_kering, "n2":solid_content, "n3":sample, "n4":lot})
+                        st.success(f'berhasil memasukkan ke database')
+                    st.cache_data.clear()
+                    time.sleep(5)
                     st.experimental_rerun()
                 else:
                     st.error('silahkan isi form di atas terlebih dahulu')
