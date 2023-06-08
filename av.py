@@ -1,8 +1,12 @@
 import streamlit as st
-import sqlite3
 import pandas as pd
+from sqlalchemy.sql import text
 import numpy as np
+import time
 import logging
+
+# Database connection string
+conn = st.experimental_connection("qcdb", type="sql", autocommit=True)
 
 def calculate_av(jumlah_titran, faktor_buret, faktor_NaOH, berat_sampel):
     try:
@@ -10,9 +14,6 @@ def calculate_av(jumlah_titran, faktor_buret, faktor_NaOH, berat_sampel):
     except ZeroDivisionError:
         st.error("Cannot calculate AV: berat_sampel should not be zero")
 
-def load_data():
-    query = "SELECT * FROM av_temp"
-    return query_db(query)
 
 def insert_db(query, data):
     logging.info("Inserting data into database")
@@ -36,11 +37,11 @@ def query_db(query):
     logging.info("Database query successful")
 
 def app():
-    logging.info('Acid Value Page Started')
+    # logging.info('Acid Value Page Started')
     st.title('Acid Value')
     st.write('This is the Acid Value Calculator Page.')
 
-    df = load_data()
+    df = conn.query("SELECT * FROM av_temp_test")
     active_df = df[['sec_item_num', 'nama_item', 'LOT']].drop_duplicates()
 
     opsi = st.radio('Pilih sampel', options=[f'sampel aktif ({len(active_df)})', 'sampel baru'], horizontal=True, label_visibility='hidden')
@@ -60,16 +61,22 @@ def app():
         displayed_df = df[(df['nama_item'] == input_values['nama_item']) & (df['LOT'] == input_values['LOT'])].sort_values(by='timestamp', ascending=True)
         st.table(displayed_df)
 
-        if st.button("Submit to database"):
-            try:
-                with sqlite3.connect('qc.db') as conn:
-                    displayed_df.iloc[:, 1:].to_sql('av', conn, if_exists='append', index=False)
-                    conn.execute(f"DELETE FROM av_temp WHERE nama_item='{input_values['nama_item']}' AND LOT='{input_values['LOT']}'")
-                    conn.commit()
-                    st.success("Data successfully moved from av_temp to av in the database.")
-                    st.experimental_rerun()
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+        # if st.button("Submit to database"):
+        #     try:
+        #         with conn.session as session:
+        #             session.execute(text("""INSERT INTO solid_contents_test (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
+        #                                 VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
+        #                                 {"n1": sec_item_num, "n2":nama_item, 
+        #                                 "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah})
+
+        #         with sqlite3.connect('qc.db') as conn:
+        #             displayed_df.iloc[:, 1:].to_sql('av', conn, if_exists='append', index=False)
+        #             conn.execute(f"DELETE FROM av_temp WHERE nama_item='{input_values['nama_item']}' AND LOT='{input_values['LOT']}'")
+        #             conn.commit()
+        #             st.success("Data successfully moved from av_temp to av in the database.")
+        #             st.experimental_rerun()
+        #     except Exception as e:
+        #         st.error(f"An error occurred: {e}")
 
     with st.container() as input_section:
         col1, col2 = st.columns(2)
@@ -94,10 +101,17 @@ def app():
     if submitted:
         plus_data = (sec_item_num, nama_item, LOT, suhu, faktor_buret, faktor_NaOH, berat_sampel, jumlah_titran, AV, keterangan)
         if AV:
-            query = '''INSERT INTO av_temp (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_NaOH, berat_sampel, jumlah_titran, AV, keterangan) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
-            insert_db(query, plus_data)
+            with conn.session as session:
+                session.execute(text("""INSERT INTO av_temp_test (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_NaOH, berat_sampel, jumlah_titran, AV, keterangan) 
+                                        VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, :n9, :n10);"""), 
+                                        {"n1":sec_item_num, "n2":nama_item, 
+                                        "n3":LOT, "n4":suhu, "n5": faktor_buret,
+                                        "n6": faktor_NaOH, "n7":berat_sampel, 
+                                        "n8":jumlah_titran, "n9":AV, "n10":keterangan
+                                        })
             st.success('Yeay, data has been successfully inserted!')
+            time.sleep(2)
+            st.cache_data.clear()
             st.experimental_rerun()
         else:
             st.warning('Mohon lengkapi form di atas')
