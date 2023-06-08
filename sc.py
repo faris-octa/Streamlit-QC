@@ -137,7 +137,7 @@ def app():
 
     st.latex(r'''
     Solid\:contents (\%) =
-    \frac{\left({hasil\:oven \:(g)} - {wadah\:kosong \:(g)}\right)}{berat\:sampel \:(g)} \: x \:100\%
+    \frac{{hasil\:oven \:(g)} - {wadah\:kosong \:(g)}}{berat\:sampel \:(g)} \: x \:100\%
     ''')
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ def app():
     st.title('Viscosity')
     st.write('This is the Viscosity Calculator Page.')
 
-    st.subheader("We will be available soon")
+    st.subheader("We will be available soon✌️")
 
 if __name__ == "__main__":
     # Setup logging configuration
