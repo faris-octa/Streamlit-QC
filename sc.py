@@ -1,37 +1,12 @@
 import streamlit as st
-import sqlite3
 import pandas as pd
+from sqlalchemy.sql import text
 import time
 import numpy as np
 import logging
 
 # Database connection string
-DB_CONNECTION_STRING = 'qc.db'
-
-def connect_to_db():
-    """
-    Connects to the SQLite database and returns the connection object.
-    """
-    return sqlite3.connect(DB_CONNECTION_STRING)
-
-def get_data_from_db(query):
-    """
-    Fetches data from the SQLite database based on the provided SQL query.
-    """
-    with connect_to_db() as conn:
-        return pd.read_sql_query(query, conn)
-
-def insert_into_db(query, data):
-    """
-    Inserts data into the SQLite database based on the provided SQL query and data.
-    """
-    try:
-        with connect_to_db() as conn:
-            c = conn.cursor()
-            c.execute(query, data)
-    except Exception as e:
-        logging.error(f"An error occurred when trying to insert data into the database: {e}")
-        st.error(f"An error occurred: {e}")
+conn = st.experimental_connection("qcdb", type="sql", autocommit=True)
 
 def update_db(query, data):
     """
@@ -50,8 +25,7 @@ def app():
     st.title('Solid Content')
     st.write('This is the Solid Content Calculator Page.')
 
-    query = "SELECT * FROM solid_contents WHERE berat_sampel_kering IS NULL"
-    df = get_data_from_db(query)
+    df = conn.query("SELECT * FROM solid_contents_test WHERE berat_sampel_kering IS NULL")
     
     # Creating new row for validating 
     new_row = pd.Series([None, None, None, None, None,
@@ -86,12 +60,15 @@ def app():
 
                 submitted = st.form_submit_button("Submit")
             if submitted:
-                data = (sec_item_num, nama_item, lot, berat_wadah, berat_sampel_basah)
-                query = '''INSERT INTO solid_contents (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah)
-                            VALUES (?, ?, ?, ?, ?)'''
-                insert_into_db(query, data)
-                st.success('Data berhasil ditambahkan')
+                # data = (sec_item_num, nama_item, lot, berat_wadah, berat_sampel_basah)
+                with conn.session as session:
+                    session.execute(text("""INSERT INTO solid_contents_test (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
+                                        VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
+                                        {"n1": sec_item_num, "n2":nama_item, 
+                                        "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah}) 
+                    st.success('Data berhasil ditambahkan')
                 time.sleep(2)
+                st.cache_data.clear()
                 st.experimental_rerun()
 
     with col2:
