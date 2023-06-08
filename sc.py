@@ -106,7 +106,7 @@ def app():
                                                         sc = :n2
                                                 WHERE nama_item = :n3 AND LOT = :n4"""),
                                         {"n1": berat_sampel_kering, "n2":solid_content, "n3":sample, "n4":lot})
-                        st.success(f'berhasil memasukkan ke database')
+                        st.success(f'berhasil input {sample} ke database')
                     st.cache_data.clear()
                     time.sleep(5)
                     st.experimental_rerun()
