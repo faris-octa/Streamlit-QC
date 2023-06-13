@@ -17,8 +17,10 @@ def main():
     """
     Main function to run the Streamlit app.
     """
-    # Set the configuration for the Streamlit page
-    # st.set_page_config(page_title="INKALI QC Webpage", page_icon=":tada:", layout="wide")
+    st.set_page_config(
+        page_title="INKALI QC Webpage", 
+        page_icon=":tada:", 
+        layout="wide")
     
     st.sidebar.title('Main Menu')
 
@@ -33,19 +35,19 @@ def main():
         logging.error(f"An error occurred when trying to display the page: {e}")
         st.error(f"An error occurred: {e}")
 
-        hide_st_style = """
-            <style>
-            #MainMenu {visibility: visible;}
-            footer {visibility: visible;}
-            footer:after{
-                content:'by Faris Octa';
-                display:block;
-                position:relative;
-            }
-            header {visibility: visible;}
-            </style>
-            """
-    # st.markdown(hide_st_style, unsafe_allow_html=True)
+    hide_st_style = """
+        <style>
+        #MainMenu {visibility: visible;}
+        footer {visibility: visible;}
+        footer:after{
+            content:'By Faris Octa';
+            display:block;
+            position:relative;
+        }
+        header {visibility: visible;}
+        </style>
+        """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     # Setup logging configuration
