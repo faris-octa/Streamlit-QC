@@ -16,28 +16,6 @@ def calculate_av(jumlah_titran, faktor_buret, faktor_NaOH, berat_sampel):
     except ZeroDivisionError:
         st.error("Cannot calculate AV: berat_sampel should not be zero")
 
-
-def insert_db(query, data):
-    logging.info("Inserting data into database")
-    try:
-        with sqlite3.connect('qc.db') as conn:
-            conn.execute(query, data)
-    except Exception as e:
-        logging.error("Error occurred during database operation", exc_info=True)
-        raise e
-    logging.info("Data successfully inserted")
-
-def query_db(query):
-    logging.info("Querying database")
-    try:
-        with sqlite3.connect('qc.db') as conn:
-            df = pd.read_sql(query, conn)
-        return df
-    except Exception as e:
-        logging.error("Error occurred during database operation", exc_info=True)
-        raise e
-    logging.info("Database query successful")
-
 def app():
     # logging.info('Acid Value Page Started')
     st.title('Acid Value')
