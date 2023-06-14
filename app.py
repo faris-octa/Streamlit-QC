@@ -1,4 +1,5 @@
 import streamlit as st
+import home
 import sc
 import av
 import viskositas
@@ -7,6 +8,7 @@ import logging
 
 # Dictionary mapping page names to modules
 PAGES = {
+    "HOME": home,
     "Solid Content": sc,
     "Acid Value": av,
     "Viscosity": viskositas,

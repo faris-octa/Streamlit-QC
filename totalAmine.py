@@ -89,6 +89,11 @@ def app():
             st.experimental_rerun()
         else:
             st.warning('Mohon lengkapi form di atas')
+    
+    st.latex(r'''
+    Total\:Amine =
+    \frac{{jumlah\:titran \:(mL)} \:x\: {faktor\:buret} \:x\: {faktor\:HClO4} \:x\: {5.61}}{berat\:sampel}
+    ''')
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

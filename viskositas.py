@@ -14,7 +14,7 @@ def app():
 
     image = Image.open('maintenance.jpeg')
 
-    st.image(image)
+    st.image(image, use_column_width='always')
     
 
 if __name__ == "__main__":
