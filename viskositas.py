@@ -81,9 +81,9 @@ def app():
         col1, col2 = st.columns(2)
 
         with col1:
-            sec_item_num = st.text_input("Second item number")
-            nama_item = st.text_input("Nama item")
-            LOT = st.text_input("LOT")
+            sec_item_num = st.text_input("Second item number", value=input_values['sec_item_num'], disabled=(opsi == 'sampel aktif'))
+            nama_item = st.text_input("Nama item", value=input_values['nama_item'], disabled=(opsi == 'sampel aktif'))
+            LOT = st.text_input("LOT", value=input_values['LOT'], disabled=(opsi == 'sampel aktif'))
 
         with col2:
             spindle = st.selectbox('tipe spindle', options=(1, 2, 3, 4))
@@ -95,18 +95,21 @@ def app():
             keterangan = st.text_input('keterangan')
         
             submitted = st.button('submit')
-
-        if submitted:
-            print(sec_item_num, nama_item, LOT, spindle, speed, viscosity, keterangan)
+    if submitted:
+        if viscosity:
             with conn.session as session:
-                session.execute(text("""INSERT INTO viscosity_test (sec_item_num, nama_item, LOT, spindle, speed, viscosity, keterangan) 
+                session.execute(text("""INSERT INTO viscosity_temp (sec_item_num, nama_item, LOT, spindle, speed, viscosity, keterangan) 
                                     VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7);"""), 
                                     {"n1":sec_item_num, "n2":nama_item, 
                                     "n3":LOT, "n4":spindle, "n5": speed,
                                     "n6": viscosity, "n7":keterangan
                                     })
             st.success('Yeay, data has been successfully inserted!')
+            time.sleep(2)
+            st.cache_data.clear()
             st.experimental_rerun()
+        else:
+            st.warning('Mohon lengkapi form di atas')
     
 
 if __name__ == "__main__":
