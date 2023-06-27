@@ -77,8 +77,7 @@ def app():
             submitted = st.button('submit')
 
     if submitted:
-        plus_data = (sec_item_num, nama_item, LOT, suhu, faktor_buret, faktor_HClO4, berat_sampel, jumlah_titran, TA, keterangan)
-        if TA:
+        if TA and sec_item_num != '' and nama_item != '' and LOT != '':
             with conn.session as session:
                 session.execute(text("""INSERT INTO ta_temp (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_HClO4, berat_sampel, jumlah_titran, TA, keterangan) 
                                         VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, :n9, :n10);"""), 
@@ -93,7 +92,7 @@ def app():
             st.experimental_rerun()
         else:
             st.warning('Mohon lengkapi form di atas')
-    
+        
     st.latex(r'''
     Total\:Amine =
     \frac{{jumlah\:titran \:(mL)} \:x\: {faktor\:buret} \:x\: {faktor\:HClO4} \:x\: {5.61}}{berat\:sampel}

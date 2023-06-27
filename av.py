@@ -24,7 +24,7 @@ def app():
     df = conn.query("SELECT * FROM av_temp")
     active_df = df[['sec_item_num', 'nama_item', 'LOT']].drop_duplicates()
 
-    opsi = st.radio('Pilih sampel', options=[f'sampel aktif ({len(active_df)})', 'sampel baru'], horizontal=True, label_visibility='hidden')
+    opsi = st.radio('Pilih sampel', options=['sampel baru', f'sampel aktif ({len(active_df)})'], horizontal=True, label_visibility='hidden')
 
     if opsi == 'sampel baru':
         input_values = {'sec_item_num': '', 'nama_item': '', 'LOT': ''}
@@ -77,8 +77,7 @@ def app():
             submitted = st.button('submit')
 
     if submitted:
-        plus_data = (sec_item_num, nama_item, LOT, suhu, faktor_buret, faktor_NaOH, berat_sampel, jumlah_titran, AV, keterangan)
-        if AV:
+        if AV and sec_item_num != '' and nama_item != '' and LOT != '':
             with conn.session as session:
                 session.execute(text("""INSERT INTO av_temp (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_NaOH, berat_sampel, jumlah_titran, AV, keterangan) 
                                         VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, :n9, :n10);"""), 
@@ -93,6 +92,7 @@ def app():
             st.experimental_rerun()
         else:
             st.warning('Mohon lengkapi form di atas')
+        
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
