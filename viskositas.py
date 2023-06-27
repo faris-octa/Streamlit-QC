@@ -76,8 +76,8 @@ def app():
             LOT = st.text_input("LOT", value=input_values['LOT'], disabled=(opsi == 'sampel aktif'))
 
         with col2:
-            spindle = st.selectbox('tipe spindle', options=(1, 2, 3, 4))
-            speed = st.selectbox('speed', options=(0.3, 0.6, 1.5, 3, 6, 12, 30, 60))
+            spindle = st.selectbox('tipe spindle', options=(1, 2, 3, 4))  
+            speed = st.selectbox('speed', options=(60, 30, 12, 6, 3, 1.5, 0.6, 0.3))
             measurement = st.text_input("measurement")
             if measurement:
                 viscosity = calculate_viscosity(spindle, speed, int(measurement))
@@ -86,7 +86,7 @@ def app():
         
             submitted = st.button('submit')
     if submitted:
-        if viscosity:
+        if viscosity and sec_item_num != '' and nama_item != '' and LOT != '':
             with conn.session as session:
                 session.execute(text("""INSERT INTO viscosity_temp (sec_item_num, nama_item, LOT, spindle, speed, dial, viscosity, keterangan) 
                                     VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8);"""), 
