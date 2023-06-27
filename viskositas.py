@@ -67,16 +67,6 @@ def app():
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
-
-
-
-
-
-
-
-
-
-
     with st.container() as input_section:
         col1, col2 = st.columns(2)
 
@@ -98,11 +88,11 @@ def app():
     if submitted:
         if viscosity:
             with conn.session as session:
-                session.execute(text("""INSERT INTO viscosity_temp (sec_item_num, nama_item, LOT, spindle, speed, viscosity, keterangan) 
-                                    VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7);"""), 
-                                    {"n1":sec_item_num, "n2":nama_item, 
-                                    "n3":LOT, "n4":spindle, "n5": speed,
-                                    "n6": viscosity, "n7":keterangan
+                session.execute(text("""INSERT INTO viscosity_temp (sec_item_num, nama_item, LOT, spindle, speed, dial, viscosity, keterangan) 
+                                    VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8);"""), 
+                                    {"n1":sec_item_num, "n2":nama_item, "n3":LOT, 
+                                    "n4":spindle, "n5": speed, "n6": measurement,
+                                    "n7": viscosity, "n8":keterangan
                                     })
             st.success('Yeay, data has been successfully inserted!')
             time.sleep(2)
