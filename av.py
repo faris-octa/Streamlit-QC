@@ -21,7 +21,7 @@ def app():
     st.title('Acid Value')
     st.write('This is the Acid Value Calculator Page.')
 
-    df = conn.query("SELECT * FROM av_temp_test")
+    df = conn.query("SELECT * FROM av_temp")
     active_df = df[['sec_item_num', 'nama_item', 'LOT']].drop_duplicates()
 
     opsi = st.radio('Pilih sampel', options=[f'sampel aktif ({len(active_df)})', 'sampel baru'], horizontal=True, label_visibility='hidden')
@@ -44,8 +44,8 @@ def app():
             if st.button("Submit to database"):
                 try:
                     with conn.session as session:
-                        displayed_df.iloc[:, 1:].to_sql('av_test', con=engine, if_exists='append', index=False)
-                        session.execute(text("DELETE FROM av_temp_test WHERE nama_item=:n1 AND LOT=:n2"), {"n1": input_values['nama_item'], "n2": input_values['LOT']})
+                        displayed_df.iloc[:, 1:].to_sql('av', con=engine, if_exists='append', index=False)
+                        session.execute(text("DELETE FROM av_temp WHERE nama_item=:n1 AND LOT=:n2"), {"n1": input_values['nama_item'], "n2": input_values['LOT']})
                         st.success("Data successfully moved from av_temp to av in the database.")
                         st.cache_data.clear()
                         st.experimental_rerun()
@@ -80,7 +80,7 @@ def app():
         plus_data = (sec_item_num, nama_item, LOT, suhu, faktor_buret, faktor_NaOH, berat_sampel, jumlah_titran, AV, keterangan)
         if AV:
             with conn.session as session:
-                session.execute(text("""INSERT INTO av_temp_test (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_NaOH, berat_sampel, jumlah_titran, AV, keterangan) 
+                session.execute(text("""INSERT INTO av_temp (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_NaOH, berat_sampel, jumlah_titran, AV, keterangan) 
                                         VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, :n9, :n10);"""), 
                                         {"n1":sec_item_num, "n2":nama_item, 
                                         "n3":LOT, "n4":suhu, "n5": faktor_buret,
