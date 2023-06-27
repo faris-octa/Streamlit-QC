@@ -36,22 +36,26 @@ def app():
         combined_list = active_df.apply(combine_columns, axis=1).tolist()
         selected_sample = st.selectbox('Pilih Sampel', options=combined_list, index= len(active_df)-1)
         selected_row = df.loc[(df['nama_item'] + ' (' + df['LOT'] + ')') == selected_sample]
-        input_values = {label: selected_row[label].values[0] for label in ['sec_item_num', 'nama_item', 'LOT']}
+        if not selected_row.empty:
+            input_values = {label: selected_row[label].values[0] for label in ['sec_item_num', 'nama_item', 'LOT']}
 
-        displayed_df = df[(df['nama_item'] == input_values['nama_item']) & (df['LOT'] == input_values['LOT'])].sort_values(by='timestamp', ascending=True)
-        st.table(displayed_df)
+            displayed_df = df[(df['nama_item'] == input_values['nama_item']) & (df['LOT'] == input_values['LOT'])].sort_values(by='timestamp', ascending=True)
+            st.table(displayed_df[['sec_item_num', 'nama_item', 'LOT', 'timestamp', 'suhu', 'AV', 'keterangan']])
+            if st.button("Submit to database"):
+                try:
+                    with conn.session as session:
+                        displayed_df.iloc[:, 1:].to_sql('av_test', con=engine, if_exists='append', index=False)
+                        session.execute(text("DELETE FROM av_temp_test WHERE nama_item=:n1 AND LOT=:n2"), {"n1": input_values['nama_item'], "n2": input_values['LOT']})
+                        st.success("Data successfully moved from av_temp to av in the database.")
+                        st.cache_data.clear()
+                        st.experimental_rerun()
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
+        else:
+            st.warning('Tidak ada sampel aktif saat ini, mohon pilih opsi (sampel baru)')
 
-        if st.button("Submit to database"):
-            try:
-                with conn.session as session:
-                    displayed_df.iloc[:, 1:].to_sql('av_test', con=engine, if_exists='append', index=False)
-                    session.execute(text("DELETE FROM av_temp_test WHERE nama_item=:n1 AND LOT=:n2"), {"n1": input_values['nama_item'], "n2": input_values['LOT']})
-                    st.success("Data successfully moved from av_temp to av in the database.")
-                    st.cache_data.clear()
-                    st.experimental_rerun()
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
 
+    #####################################################
     with st.container() as input_section:
         col1, col2 = st.columns(2)
 
