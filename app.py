@@ -8,11 +8,11 @@ import logging
 
 # Dictionary mapping page names to modules
 PAGES = {
-    "HOME": home,
-    "Solid Content": sc,
+    "---TRACKER---": home,
     "Acid Value": av,
-    "Viscosity": viskositas,
-    "Total Amine": totalAmine
+    "Solid Content": sc,
+    "Total Amine": totalAmine,
+    "Viscosity": viskositas
 }
 
 def main():
