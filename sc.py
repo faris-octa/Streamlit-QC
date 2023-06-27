@@ -48,16 +48,18 @@ def app():
 
                 submitted = st.form_submit_button("Submit")
             if submitted:
-                # data = (sec_item_num, nama_item, lot, berat_wadah, berat_sampel_basah)
-                with conn.session as session:
-                    session.execute(text("""INSERT INTO solid_contents_test (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
-                                        VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
-                                        {"n1": sec_item_num, "n2":nama_item, 
-                                        "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah}) 
-                    st.success('Data berhasil ditambahkan')
-                time.sleep(2)
-                st.cache_data.clear()
-                st.experimental_rerun()
+                if sec_item_num == '' or nama_item == '' or lot == '' or berat_wadah <= 0 or berat_sampel_basah <=0:
+                    st.error('Mohon lengkapi form dengan benar')
+                else:
+                    with conn.session as session:
+                        session.execute(text("""INSERT INTO solid_contents_test (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
+                                            VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
+                                            {"n1": sec_item_num, "n2":nama_item, 
+                                            "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah}) 
+                        st.success('Data berhasil ditambahkan')
+                    time.sleep(2)
+                    st.cache_data.clear()
+                    st.experimental_rerun()
 
     with col2:
         with st.expander("Input sampel kering"):
@@ -99,7 +101,7 @@ def app():
                     time.sleep(5)
                     st.experimental_rerun()
                 else:
-                    st.error('silahkan isi form di atas terlebih dahulu')
+                    st.error('silahkan pilih sampel terlebih dahulu')
 
 
     st.latex(r'''
