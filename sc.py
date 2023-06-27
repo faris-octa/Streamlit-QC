@@ -13,7 +13,7 @@ def app():
     st.title('Solid Content')
     st.write('This is the Solid Content Calculator Page.')
 
-    df = conn.query("SELECT * FROM solid_contents_test WHERE berat_sampel_kering IS NULL")
+    df = conn.query("SELECT * FROM solid_content WHERE berat_sampel_kering IS NULL")
     
     if not df.empty:
         # Creating new row for validating 
@@ -53,7 +53,7 @@ def app():
                     st.error('Mohon lengkapi form dengan benar')
                 else:
                     with conn.session as session:
-                        session.execute(text("""INSERT INTO solid_contents_test (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
+                        session.execute(text("""INSERT INTO solid_content (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
                                             VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
                                             {"n1": sec_item_num, "n2":nama_item, 
                                             "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah}) 
@@ -91,7 +91,7 @@ def app():
                 if sample != None and solid_content > 0:
                     remaining_data = (berat_sampel_kering, solid_content, sample, lot)
                     with conn.session as session:
-                        session.execute(text("""UPDATE solid_contents_test
+                        session.execute(text("""UPDATE solid_content
                                                 SET berat_sampel_kering = :n1,
                                                     timestamp2 = DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s'),
                                                         sc = :n2
