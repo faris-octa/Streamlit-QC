@@ -15,24 +15,25 @@ def app():
 
     df = conn.query("SELECT * FROM solid_contents_test WHERE berat_sampel_kering IS NULL")
     
-    # Creating new row for validating 
-    new_row = pd.Series([None, None, None, None, None,
-                        None, None, None, None, None], index=df.columns)
-    new_row_df = pd.DataFrame([new_row])                    
-    df = pd.concat([df, new_row_df], ignore_index=True)
-    df.index = np.arange(1, len(df)+1)
+    if not df.empty:
+        # Creating new row for validating 
+        new_row = pd.Series([None, None, None, None, None,
+                            None, None, None, None, None], index=df.columns)
+        new_row_df = pd.DataFrame([new_row])                    
+        df = pd.concat([df, new_row_df], ignore_index=True)
+        df.index = np.arange(1, len(df)+1)
 
-    # displayed table
-    displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_wadah', 'berat_sampel_basah', 'timestamp_init']][:-1]
-    displayed_df = displayed_df.rename(columns={
-        'sec_item_num': 'Second Item Number',
-        'nama_item': 'Nama Item',
-        'LOT': 'LOT',
-        'berat_wadah': 'Berat Wadah (g)',
-        'berat_sampel_basah': 'Berat Sampel (g)',
-        'timestamp_init': 'Waktu Mulai'
-        })
-    st.table(displayed_df)
+        # displayed table
+        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_wadah', 'berat_sampel_basah', 'timestamp_init']][:-1]
+        displayed_df = displayed_df.rename(columns={
+            'sec_item_num': 'Second Item Number',
+            'nama_item': 'Nama Item',
+            'LOT': 'LOT',
+            'berat_wadah': 'Berat Wadah (g)',
+            'berat_sampel_basah': 'Berat Sampel (g)',
+            'timestamp_init': 'Waktu Mulai'
+            })
+        st.table(displayed_df)
 
     # Fitur input sampel dan update sampel
     col1, col2 = st.columns(2)
