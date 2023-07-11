@@ -17,14 +17,19 @@ def app():
                                 options = opsi,
                                 key='sample_to_remove')
     
-    if sample == 'Solid Content':
-        df = conn.query("SELECT * FROM solid_contents_test")
-    elif sample == 'Acid Value':
-        df = conn.query("SELECT * FROM av_test")
-    elif sample == 'Total Amine':
-        df = conn.query("SELECT * FROM ta")
+    # if sample == 'Solid Content':
+    #     df = conn.query("SELECT * FROM solid_contents_test")
+    # elif sample == 'Acid Value':
+    #     df = conn.query("SELECT * FROM av_test")
+    # elif sample == 'Total Amine':
+    #     df = conn.query("SELECT * FROM ta")
 
-    st.table(df)
+    if jenis_pengukuran and nama_produk and lot:
+        data = get_data(jenis_pengukuran, nama_produk, lot)
+
+    st.table(data)
+
+
     
     # # Creating new row for validating 
     # new_row = pd.Series([None, None, None, None, None,

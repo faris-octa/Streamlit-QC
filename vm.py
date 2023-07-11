@@ -9,27 +9,30 @@ import logging
 conn = st.experimental_connection("qcdb", type="sql", autocommit=True)
 
 def app():
-    logging.info('Solid Content Page Started')
-    st.title('Solid Content')
-    st.write('This is the Solid Content Calculator Page.')
+    logging.info('Volatile Matter Page Started')
+    st.title('Volatile Matter')
+    st.write('This is the Volatile Matter Calculator Page.')
 
-    df = conn.query("SELECT * FROM solid_content WHERE berat_sampel_kering IS NULL")
+    df = conn.query("SELECT * FROM volatile_matter WHERE berat_sampel_kering IS NULL")
     
     if not df.empty:
         # Creating new row for validating 
         new_row = pd.Series([None, None, None, None, None,
-                            None, None, None, None, None], index=df.columns)
+                            None, None, None, None, None,
+                            None, None], index=df.columns)
         new_row_df = pd.DataFrame([new_row])                    
         df = pd.concat([df, new_row_df], ignore_index=True)
         df.index = np.arange(1, len(df)+1)
 
         # displayed table
-        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_wadah', 'berat_sampel_basah', 'timestamp_init']][:-1]
+        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_glass_mode', 'berat_glass_rod', 'berat_Na2SO4','berat_sampel_basah', 'timestamp_init']][:-1]
         displayed_df = displayed_df.rename(columns={
             'sec_item_num': 'Second Item Number',
             'nama_item': 'Nama Item',
             'LOT': 'LOT',
-            'berat_wadah': 'Berat Wadah (g)',
+            'berat_glass_mode': 'Berat Glass Mode (g)',
+            'berat_glass_rod': 'Berat Glass Rod (g)',
+            'berat_Na2SO4': 'Berat Na2SO4 (g)',
             'berat_sampel_basah': 'Berat Sampel (g)',
             'timestamp_init': 'Waktu Mulai'
             })
@@ -44,19 +47,22 @@ def app():
                 sec_item_num = st.text_input('Second Item Number')
                 nama_item = st.text_input('Nama Item')
                 lot = st.text_input('LOT')
-                berat_wadah = st.number_input("Berat Wadah", format='%f')
-                berat_sampel_basah = st.number_input("Berat Sampel Basah", format='%f')
-
-                submitted = st.form_submit_button("Submit", use_container_width=True)
+                berat_glass_mode = st.number_input('Berat Glass Mode', format='%f')
+                berat_glass_rod = st.number_input('Berat Glass Rod', format='%f')
+                berat_Na2SO4 = st.number_input('Berat Na2SO4', format='%f')
+                berat_sampel_basah = st.number_input('Berat Sampel', format='%f')
+                
+                submitted = st.form_submit_button("Submit")
             if submitted:
-                if sec_item_num == '' or nama_item == '' or lot == '' or berat_wadah <= 0 or berat_sampel_basah <=0:
+                if sec_item_num == '' or nama_item == '' or lot == '' or (berat_glass_mode + berat_glass_rod) <= 0 or berat_sampel_basah <= 0:
                     st.error('Mohon lengkapi form dengan benar')
                 else:
                     with conn.session as session:
-                        session.execute(text("""INSERT INTO solid_content (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
-                                            VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
+                        session.execute(text("""INSERT INTO volatile_matter (sec_item_num, nama_item, LOT, berat_glass_mode, berat_glass_rod, berat_Na2SO4, berat_sampel_basah) 
+                                            VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7);"""), 
                                             {"n1": sec_item_num, "n2":nama_item, 
-                                            "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah}) 
+                                            "n3":lot, "n4":berat_glass_mode, "n5":berat_glass_rod,
+                                            "n6": berat_Na2SO4, "n7":berat_sampel_basah}) 
                         st.success('Data berhasil ditambahkan')
                     time.sleep(2)
                     st.cache_data.clear()
@@ -83,20 +89,21 @@ def app():
                 df_selected = df[(df['nama_item'] == sample) & (df['LOT'] == lot)]
                 berat_sampel_kering = st.number_input("Berat sampel kering", format='%f')
                 if berat_sampel_kering > 0 :
-                    solid_content = round((berat_sampel_kering - float(df_selected['berat_wadah'])) / float(df_selected['berat_sampel_basah']) * 100, 2)
-                    st.text(f"nilai Solid Content: {solid_content}%")
+                    berat_total = float(df_selected['berat_Na2SO4']) + float(df_selected['berat_glass_mode']) + float(df_selected['berat_glass_rod']) + float(df_selected['berat_sampel_basah'])
+                    volatile_matter = round((berat_total - berat_sampel_kering) / float(df_selected['berat_sampel_basah']) * 100, 2)
+                    st.text(f"nilai Volatile Matter: {volatile_matter}%")
             
-            submitted = st.button("Submit", use_container_width=True)
+            submitted = st.button("Submit")
             if submitted:
-                if sample != None and solid_content > 0:
-                    remaining_data = (berat_sampel_kering, solid_content, sample, lot)
+                if sample != None and volatile_matter > 0:
+                    remaining_data = (berat_sampel_kering, volatile_matter, sample, lot)
                     with conn.session as session:
-                        session.execute(text("""UPDATE solid_content
+                        session.execute(text("""UPDATE volatile_matter
                                                 SET berat_sampel_kering = :n1,
                                                     timestamp2 = DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s'),
-                                                        sc = :n2
+                                                        volatile_matter = :n2
                                                 WHERE nama_item = :n3 AND LOT = :n4"""),
-                                        {"n1": berat_sampel_kering, "n2":solid_content, "n3":sample, "n4":lot})
+                                        {"n1": berat_sampel_kering, "n2":volatile_matter, "n3":sample, "n4":lot})
                         st.success(f'berhasil input {sample} ke database')
                     st.cache_data.clear()
                     time.sleep(5)
@@ -105,10 +112,10 @@ def app():
                     st.error('silahkan pilih sampel terlebih dahulu')
 
 
-    st.latex(r'''
-    Solid\:contents (\%) =
-    \frac{{hasil\:oven \:(g)} - {wadah\:kosong \:(g)}}{berat\:sampel \:(g)} \: x \:100\%
-    ''')
+    # st.latex(r'''
+    # Solid\:contents (\%) =
+    # \frac{{hasil\:oven \:(g)} - {wadah\:kosong \:(g)}}{berat\:sampel \:(g)} \: x \:100\%
+    # ''')
 
 if __name__ == "__main__":
     # Setup logging configuration

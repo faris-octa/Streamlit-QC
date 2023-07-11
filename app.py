@@ -2,6 +2,7 @@ import streamlit as st
 import home
 import sc
 import av
+import vm
 import viskositas
 import totalAmine
 import logging
@@ -12,7 +13,8 @@ PAGES = {
     "Acid Value": av,
     "Solid Content": sc,
     "Total Amine": totalAmine,
-    "Viscosity": viskositas
+    "Viscosity": viskositas,
+    "Volatile Matter": vm
 }
 
 def main():
