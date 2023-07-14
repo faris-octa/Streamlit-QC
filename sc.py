@@ -13,27 +13,28 @@ def app():
     st.title('Solid Content')
     st.write('This is the Solid Content Calculator Page.')
 
+    # Ambil data dari database
     df = conn.query("SELECT * FROM solid_content WHERE berat_sampel_kering IS NULL")
     
+    # Cek jika terdapat sampel yang sedang aktif
     if not df.empty:
-        # Creating new row for validating 
+        # Membuat baris kosong untuk validasi 
         new_row = pd.Series([None, None, None, None, None,
                             None, None, None, None, None], index=df.columns)
         new_row_df = pd.DataFrame([new_row])                    
         df = pd.concat([df, new_row_df], ignore_index=True)
         df.index = np.arange(1, len(df)+1)
 
-        # displayed table
-        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_wadah', 'berat_sampel_basah', 'timestamp_init']][:-1]
+        # Menampilkan tabel
+        displayed_df = df[['nama_item', 'LOT', 'berat_wadah', 'berat_sampel_basah', 'timestamp_init']][:-1]
         displayed_df = displayed_df.rename(columns={
-            'sec_item_num': 'Second Item Number',
             'nama_item': 'Nama Item',
             'LOT': 'LOT',
             'berat_wadah': 'Berat Wadah (g)',
             'berat_sampel_basah': 'Berat Sampel (g)',
             'timestamp_init': 'Waktu Mulai'
             })
-        st.table(displayed_df)
+        st.dataframe(displayed_df, use_container_width=True, hide_index=True)
 
     # Fitur input sampel dan update sampel
     col1, col2 = st.columns(2)
@@ -47,7 +48,9 @@ def app():
                 berat_wadah = st.number_input("Berat Wadah", format='%f')
                 berat_sampel_basah = st.number_input("Berat Sampel Basah", format='%f')
 
+                # Menangani submit form
                 submitted = st.form_submit_button("Submit", use_container_width=True)
+            # Cek jika form sudah diisi dengan benar dan menambahkan ke database
             if submitted:
                 if sec_item_num == '' or nama_item == '' or lot == '' or berat_wadah <= 0 or berat_sampel_basah <=0:
                     st.error('Mohon lengkapi form dengan benar')
@@ -55,9 +58,10 @@ def app():
                     with conn.session as session:
                         session.execute(text("""INSERT INTO solid_content (sec_item_num, nama_item, LOT, berat_wadah, berat_sampel_basah) 
                                             VALUES (:n1, :n2, :n3, :n4, :n5);"""), 
-                                            {"n1": sec_item_num, "n2":nama_item, 
-                                            "n3":lot, "n4":berat_wadah, "n5":berat_sampel_basah}) 
+                                            {"n1": sec_item_num, "n2":nama_item.upper(), 
+                                            "n3":lot.upper(), "n4":berat_wadah, "n5":berat_sampel_basah}) 
                         st.success('Data berhasil ditambahkan')
+                    # Refresh halaman
                     time.sleep(2)
                     st.cache_data.clear()
                     st.experimental_rerun()
@@ -81,7 +85,7 @@ def app():
 
             if sample != None and lot != None:
                 df_selected = df[(df['nama_item'] == sample) & (df['LOT'] == lot)]
-                berat_sampel_kering = st.number_input("Berat sampel kering", format='%f')
+                berat_sampel_kering = st.number_input("Berat hasil oven (g)", format='%f')
                 if berat_sampel_kering > 0 :
                     solid_content = round((berat_sampel_kering - float(df_selected['berat_wadah'])) / float(df_selected['berat_sampel_basah']) * 100, 2)
                     st.text(f"nilai Solid Content: {solid_content}%")
