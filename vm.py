@@ -19,19 +19,18 @@ def app():
         # Creating new row for validating 
         new_row = pd.Series([None, None, None, None, None,
                             None, None, None, None, None,
-                            None, None], index=df.columns)
+                            None], index=df.columns)
         new_row_df = pd.DataFrame([new_row])                    
         df = pd.concat([df, new_row_df], ignore_index=True)
         df.index = np.arange(1, len(df)+1)
 
         # displayed table
-        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_glass_mode', 'berat_glass_rod', 'berat_Na2SO4','berat_sampel_basah', 'timestamp_init']][:-1]
+        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_cawan', 'berat_Na2SO4','berat_sampel_basah', 'timestamp_init']][:-1]
         displayed_df = displayed_df.rename(columns={
             'sec_item_num': 'Second Item Number',
             'nama_item': 'Nama Item',
             'LOT': 'LOT',
-            'berat_glass_mode': 'Berat Glass Mode (g)',
-            'berat_glass_rod': 'Berat Glass Rod (g)',
+            'berat_cawan': 'Berat Cawan (g)',
             'berat_Na2SO4': 'Berat Na2SO4 (g)',
             'berat_sampel_basah': 'Berat Sampel (g)',
             'timestamp_init': 'Waktu Mulai'
@@ -47,22 +46,21 @@ def app():
                 sec_item_num = st.text_input('Second Item Number')
                 nama_item = st.text_input('Nama Item')
                 lot = st.text_input('LOT')
-                berat_glass_mode = st.number_input('Berat Glass Mode', format='%f')
-                berat_glass_rod = st.number_input('Berat Glass Rod', format='%f')
-                berat_Na2SO4 = st.number_input('Berat Na2SO4', format='%f')
-                berat_sampel_basah = st.number_input('Berat Sampel', format='%f')
+                berat_cawan = st.number_input('Berat Cawan (g)', format='%f')
+                berat_Na2SO4 = st.number_input('Berat Na2SO4 (20 - 30 gr)', format='%f')
+                berat_sampel_basah = st.number_input('Berat Sampel (1.5 - 2.0 gr)', format='%f')
                 
                 submitted = st.form_submit_button("Submit")
             if submitted:
-                if sec_item_num == '' or nama_item == '' or lot == '' or (berat_glass_mode + berat_glass_rod) <= 0 or berat_sampel_basah <= 0:
+                if sec_item_num == '' or nama_item == '' or lot == '' or berat_cawan <= 0 or berat_sampel_basah <= 0:
                     st.error('Mohon lengkapi form dengan benar')
                 else:
                     with conn.session as session:
-                        session.execute(text("""INSERT INTO volatile_matter (sec_item_num, nama_item, LOT, berat_glass_mode, berat_glass_rod, berat_Na2SO4, berat_sampel_basah) 
-                                            VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7);"""), 
+                        session.execute(text("""INSERT INTO volatile_matter (sec_item_num, nama_item, LOT, berat_cawan, berat_Na2SO4, berat_sampel_basah) 
+                                            VALUES (:n1, :n2, :n3, :n4, :n5, :n6);"""), 
                                             {"n1": sec_item_num, "n2":nama_item, 
-                                            "n3":lot, "n4":berat_glass_mode, "n5":berat_glass_rod,
-                                            "n6": berat_Na2SO4, "n7":berat_sampel_basah}) 
+                                            "n3":lot, "n4":berat_cawan,
+                                            "n5": berat_Na2SO4, "n6":berat_sampel_basah}) 
                         st.success('Data berhasil ditambahkan')
                     time.sleep(2)
                     st.cache_data.clear()
@@ -87,9 +85,9 @@ def app():
 
             if sample != None and lot != None:
                 df_selected = df[(df['nama_item'] == sample) & (df['LOT'] == lot)]
-                berat_sampel_kering = st.number_input("Berat sampel kering", format='%f')
+                berat_sampel_kering = st.number_input("Berat hasil oven (2.5 jam)", format='%f')
                 if berat_sampel_kering > 0 :
-                    berat_total = float(df_selected['berat_Na2SO4']) + float(df_selected['berat_glass_mode']) + float(df_selected['berat_glass_rod']) + float(df_selected['berat_sampel_basah'])
+                    berat_total = float(df_selected['berat_Na2SO4']) + float(df_selected['berat_cawan']) + float(df_selected['berat_sampel_basah'])
                     volatile_matter = round((berat_total - berat_sampel_kering) / float(df_selected['berat_sampel_basah']) * 100, 2)
                     st.text(f"nilai Volatile Matter: {volatile_matter}%")
             
