@@ -40,7 +40,15 @@ def app():
             input_values = {label: selected_row[label].values[0] for label in ['sec_item_num', 'nama_item', 'LOT']}
 
             displayed_df = df[(df['nama_item'] == input_values['nama_item']) & (df['LOT'] == input_values['LOT'])].sort_values(by='timestamp', ascending=True)
-            st.table(displayed_df[['sec_item_num', 'nama_item', 'LOT', 'timestamp', 'suhu', 'TA', 'keterangan']])
+            st.dataframe(displayed_df[['nama_item', 'LOT', 'timestamp', 'suhu', 'TA', 'keterangan']],
+                        column_config={
+                            "nama_item": "Nama Item",
+                            "timestamp": "Timestamp",
+                            "suhu" : "Suhu",
+                            "TA" : "Total Amine",
+                            "keterangan": "Keterangan"
+                        },
+                        use_container_width=True, hide_index=True)
 
             if st.button("Submit to database"):
                 try:
@@ -63,8 +71,8 @@ def app():
             sec_item_num = st.text_input("Second item number", value=input_values['sec_item_num'], disabled=(opsi == 'sampel aktif'))
             nama_item = st.text_input("Nama item", value=input_values['nama_item'], disabled=(opsi == 'sampel aktif'))
             LOT = st.text_input("LOT", value=input_values['LOT'], disabled=(opsi == 'sampel aktif'))
-            faktor_buret = st.number_input("Faktor buret", format='%f')
-            faktor_HClO4 = st.number_input("Faktor HClO4", format='%f')
+            faktor_buret = st.number_input("Faktor buret", format='%f', value=1.008)
+            faktor_HClO4 = st.number_input("Faktor HClO4", format='%f', value=1.008)
 
         with col2:
             suhu = st.text_input('Suhu')
@@ -81,8 +89,8 @@ def app():
             with conn.session as session:
                 session.execute(text("""INSERT INTO ta_temp (sec_item_num, nama_item, LOT, suhu, FAKTOR_BURET, FAKTOR_HClO4, berat_sampel, jumlah_titran, TA, keterangan) 
                                         VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, :n9, :n10);"""), 
-                                        {"n1":sec_item_num, "n2":nama_item, 
-                                        "n3":LOT, "n4":suhu, "n5": faktor_buret,
+                                        {"n1":sec_item_num, "n2":nama_item.upper(), 
+                                        "n3":LOT.upper(), "n4":suhu, "n5": faktor_buret,
                                         "n6": faktor_HClO4, "n7":berat_sampel, 
                                         "n8":jumlah_titran, "n9":TA, "n10":keterangan
                                         })
