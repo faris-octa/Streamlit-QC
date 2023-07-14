@@ -25,9 +25,8 @@ def app():
         df.index = np.arange(1, len(df)+1)
 
         # displayed table
-        displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_cawan', 'berat_Na2SO4','berat_sampel_basah', 'timestamp_init']][:-1]
+        displayed_df = df[['nama_item', 'LOT', 'berat_cawan', 'berat_Na2SO4','berat_sampel_basah', 'timestamp_init']][:-1]
         displayed_df = displayed_df.rename(columns={
-            'sec_item_num': 'Second Item Number',
             'nama_item': 'Nama Item',
             'LOT': 'LOT',
             'berat_cawan': 'Berat Cawan (g)',
@@ -35,7 +34,7 @@ def app():
             'berat_sampel_basah': 'Berat Sampel (g)',
             'timestamp_init': 'Waktu Mulai'
             })
-        st.table(displayed_df)
+        st.dataframe(displayed_df, use_container_width=True, hide_index=True)
 
     # Fitur input sampel dan update sampel
     col1, col2 = st.columns(2)
@@ -58,8 +57,8 @@ def app():
                     with conn.session as session:
                         session.execute(text("""INSERT INTO volatile_matter (sec_item_num, nama_item, LOT, berat_cawan, berat_Na2SO4, berat_sampel_basah) 
                                             VALUES (:n1, :n2, :n3, :n4, :n5, :n6);"""), 
-                                            {"n1": sec_item_num, "n2":nama_item, 
-                                            "n3":lot, "n4":berat_cawan,
+                                            {"n1": sec_item_num, "n2":nama_item.upper(), 
+                                            "n3":lot.upper(), "n4":berat_cawan,
                                             "n5": berat_Na2SO4, "n6":berat_sampel_basah}) 
                         st.success('Data berhasil ditambahkan')
                     time.sleep(2)
@@ -83,7 +82,7 @@ def app():
                                     disabled = st.session_state.sample_to_remove == None,
                                     key='lot_to_remove')
 
-            if sample != None and lot != None:
+            if sample is not None and lot is not None:
                 df_selected = df[(df['nama_item'] == sample) & (df['LOT'] == lot)]
                 berat_sampel_kering = st.number_input("Berat hasil oven (2.5 jam)", format='%f')
                 if berat_sampel_kering > 0 :
