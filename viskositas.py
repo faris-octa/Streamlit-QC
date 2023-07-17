@@ -53,7 +53,13 @@ def app():
         input_values = {label: selected_row[label].values[0] for label in ['sec_item_num', 'nama_item', 'LOT']}
 
         displayed_df = df[(df['nama_item'] == input_values['nama_item']) & (df['LOT'] == input_values['LOT'])].sort_values(by='timestamp', ascending=True)
-        st.table(displayed_df)
+        st.dataframe(displayed_df[['nama_item', 'LOT', 'timestamp', 'spindle', 'speed', 'dial', 'viscosity', 'keterangan']], 
+                    column_config={
+                            "nama_item": "Nama Item",
+                            "timestamp": "Timestamp",
+                            "keterangan": "Keterangan"
+                        },
+                        use_container_width=True, hide_index=True)
 
     #########
         if st.button("Submit to database"):
