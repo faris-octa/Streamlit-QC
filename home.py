@@ -1,56 +1,72 @@
 import streamlit as st
-import pandas as pd
-from sqlalchemy.sql import text
-import time
-import numpy as np
-import logging
 
-# Database connection string
-conn = st.experimental_connection("qcdb", type="sql", autocommit=True)
+st.set_page_config(
+    page_title="Home",
+    page_icon="👋",
+)
 
-def app():
-    logging.info('Solid Content Page Started')
-    st.title('Home')
-
-    opsi = ['Solid Content', 'Acid Value', 'Total Amine']
-    sample = st.selectbox('Pilih jenis pengukuran',
-                                options = opsi,
-                                key='sample_to_remove')
-    
-    # if sample == 'Solid Content':
-    #     df = conn.query("SELECT * FROM solid_contents_test")
-    # elif sample == 'Acid Value':
-    #     df = conn.query("SELECT * FROM av_test")
-    # elif sample == 'Total Amine':
-    #     df = conn.query("SELECT * FROM ta")
-
-    if jenis_pengukuran and nama_produk and lot:
-        data = get_data(jenis_pengukuran, nama_produk, lot)
-
-    st.table(data)
+qc_conn = st.connection("qcdb", type="sql", autocommit=True)
 
 
-    
-    # # Creating new row for validating 
-    # new_row = pd.Series([None, None, None, None, None,
-    #                     None, None, None, None, None], index=df.columns)
-    # new_row_df = pd.DataFrame([new_row])                    
-    # df = pd.concat([df, new_row_df], ignore_index=True)
-    # df.index = np.arange(1, len(df)+1)
+st.write("# Welcome to QC App! 👋")
+st.divider()
 
-    # # displayed table
-    # displayed_df = df[['sec_item_num', 'nama_item', 'LOT', 'berat_wadah', 'berat_sampel_basah', 'timestamp_init']][:-1]
-    # displayed_df = displayed_df.rename(columns={
-    #     'sec_item_num': 'Second Item Number',
-    #     'nama_item': 'Nama Item',
-    #     'LOT': 'LOT',
-    #     'berat_wadah': 'Berat Wadah (g)',
-    #     'berat_sampel_basah': 'Berat Sampel (g)',
-    #     'timestamp_init': 'Waktu Mulai'
-    #     })
-    # st.table(displayed_df)
+st.sidebar.success("Pilih opsi di atas untuk input data.")
 
-if __name__ == "__main__":
-    # Setup logging configuration
-    logging.basicConfig(level=logging.INFO)
-    app()
+measurement = ["Acid Value", "Solid Content", "Total Amine", "Volatile Matter"]
+
+qc_option = st.selectbox(
+        'Pengukuran',
+        measurement,
+        index=None,
+        placeholder="Pilih jenis pengukuran...",
+        key = "qc_option"
+    )
+
+
+if qc_option == "Acid Value":
+    df = qc_conn.query("select * from acidvalue", 
+    show_spinner = True, 
+    ttl=10
+    )
+
+    sampel_option_av = st.selectbox(
+        'Nama Item',
+        df['ItemDescription'].unique().tolist(),
+        index=None,
+        placeholder="Pilih Item...",
+        key = "sampel_option_av"
+    )
+
+    if sampel_option_av != None:
+        lot_option_av = st.selectbox(
+            'Lot Number',
+            df.loc[df['ItemDescription'] == sampel_option_av, 'LotSerialNumber'].unique().tolist(),
+            index=None,
+            placeholder="Pilih Lot...",
+            key = "lot_option_av"
+        )
+
+        if lot_option_av is not None:
+            st.dataframe(
+                df.loc[(df['ItemDescription'] == sampel_option_av) & (df['LotSerialNumber'] == lot_option_av),
+                ["TimeStamp", "Suhu", "FaktorBuret", "FaktorNaOH", "BeratSampel", "JumlahTitran", "AcidValue", "Keterangan", "Operator"]
+                ],
+                column_config={
+                    "FaktorBuret": "Faktor Buret",
+                    "FaktorNaOH": "Faktor NaOH",
+                    "BeratSampel": "Berat Sample (g)",
+                    "Suhu": "Temperature",
+                    "JumlahTitran": "Titran (mL)",
+                    "AcidValue": "Acid Value",
+                    "Keterangan" : "Status",
+                    "TimeStamp" : st.column_config.DatetimeColumn("Waktu", format="h:mm a")
+                },
+                hide_index = True,
+                use_container_width = True
+            )
+        
+        # st.dataframe(df)
+
+elif qc_option == "Total Amine":
+    None
