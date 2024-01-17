@@ -3,6 +3,16 @@ import streamlit as st
 st.set_page_config(
     page_title="Home",
     page_icon="👋",
+    layout = "wide",
+    menu_items={
+        'Get Help': 'https://docs.streamlit.io/',
+        'Report a bug': "mailto:m.faris.octa@gmail.com",
+        'About': """
+        This is an INKALI QC Calculator App
+        \nAuthor : Faris Octa
+        """
+    }
+
 )
 
 qc_conn = st.connection("qcdb", type="sql", autocommit=True)
