@@ -47,7 +47,7 @@ if qc_option == "Acid Value":
             key = "lot_option_av"
         )
 
-        if lot_option_av is not None:
+        if lot_option_av != None:
             st.dataframe(
                 df.loc[(df['ItemDescription'] == sampel_option_av) & (df['LotSerialNumber'] == lot_option_av),
                 ["TimeStamp", "Suhu", "FaktorBuret", "FaktorNaOH", "BeratSampel", "JumlahTitran", "AcidValue", "Keterangan", "Operator"]
@@ -91,7 +91,7 @@ elif qc_option == "Total Amine":
             key = "lot_option_ta"
             )
 
-        if lot_option_ta is not None:
+        if lot_option_ta != None:
             st.dataframe(
                 df.loc[(df['ItemDescription'] == sampel_option_ta) & (df['LotSerialNumber'] == lot_option_ta),
                 ["TimeStamp", "Suhu", "FaktorBuret", "FaktorHClO4", "BeratSampel", "JumlahTitran", "TotalAmine", "Keterangan", "Operator"]
@@ -135,7 +135,7 @@ elif qc_option == "Solid Content":
             key = "lot_option_sc"
             )
 
-        if lot_option_sc is not None:
+        if lot_option_sc != None:
             st.dataframe(
                 df.loc[(df['ItemDescription'] == sampel_option_sc) & (df['LotSerialNumber'] == lot_option_sc),
                 ["Metode", "SolidContent", "BeratWadah", "BeratSampelBasah", "BeratAkhir", "Status", "Operator1", "Operator2", "TimeStampInit", "TimeStampEnd"]
@@ -154,3 +154,45 @@ elif qc_option == "Solid Content":
         
             # st.dataframe(df) #-> uncomment for debugging   
             
+elif qc_option == "Volatile Matter":
+    df = qc_conn.query("select * from volatilematter", 
+    show_spinner = True, 
+    ttl=10
+    )
+
+    sampel_option_vm = st.selectbox(
+        'Nama Item',
+        df['ItemDescription'].unique().tolist(),
+        index=None,
+        placeholder="Pilih Item...",
+        key = "sampel_option_vm"
+        )
+
+    if sampel_option_vm != None:
+        lot_option_vm = st.selectbox(
+            'Lot Number',
+            df.loc[df['ItemDescription'] == sampel_option_vm, 'LotSerialNumber'].unique().tolist(),
+            index=None,
+            placeholder="Pilih Lot...",
+            key = "lot_option_vm"
+            )
+
+        if lot_option_vm != None:
+            st.dataframe(
+                df.loc[(df['ItemDescription'] == sampel_option_vm) & (df['LotSerialNumber'] == lot_option_vm),
+                ["VolatileMatter", "BeratWadah", "BeratNa2SO4", "BeratSampelBasah", "BeratAkhir", "Status", "Operator1", "Operator2", "TimeStampInit", "TimeStampEnd"]
+                ],
+                column_config={
+                    "BeratWadah": "Berat Cawan",
+                    "BeratNa2SO4": "Na2SO4 (g)",
+                    "BeratSampelBasah": "Berat Sampel",
+                    "BeratAkhir": "Berat Oven",
+                    "VolatileMatter": "(%) Volatile Matter",
+                    "TimeStampInit": st.column_config.DatetimeColumn("Waktu Masuk", format="h:mm a"),
+                    "TimeStampEnd": st.column_config.DatetimeColumn("Waktu Keluar", format="h:mm a"),
+                },
+                hide_index = True,
+                use_container_width = True
+            )
+        
+            # st.dataframe(df) #-> uncomment for debugging
