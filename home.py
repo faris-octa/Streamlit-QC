@@ -111,3 +111,46 @@ elif qc_option == "Total Amine":
             )
         
             # st.dataframe(df) -> uncomment for debugging
+
+elif qc_option == "Solid Content":
+    df = qc_conn.query("select * from solidcontent", 
+    show_spinner = True, 
+    ttl=10
+    )
+
+    sampel_option_sc = st.selectbox(
+        'Nama Item',
+        df['ItemDescription'].unique().tolist(),
+        index=None,
+        placeholder="Pilih Item...",
+        key = "sampel_option_sc"
+        )
+
+    if sampel_option_sc != None:
+        lot_option_sc = st.selectbox(
+            'Lot Number',
+            df.loc[df['ItemDescription'] == sampel_option_sc, 'LotSerialNumber'].unique().tolist(),
+            index=None,
+            placeholder="Pilih Lot...",
+            key = "lot_option_sc"
+            )
+
+        if lot_option_sc is not None:
+            st.dataframe(
+                df.loc[(df['ItemDescription'] == sampel_option_sc) & (df['LotSerialNumber'] == lot_option_sc),
+                ["Metode", "SolidContent", "BeratWadah", "BeratSampelBasah", "BeratAkhir", "Status", "Operator1", "Operator2", "TimeStampInit", "TimeStampEnd"]
+                ],
+                column_config={
+                    "BeratWadah": "Berat Cawan",
+                    "BeratSampelBasah": "Berat Sampel",
+                    "BeratAkhir": "Berat Oven",
+                    "SolidContent": "(%) Solid Content",
+                    "TimeStampInit": st.column_config.DatetimeColumn("Waktu Masuk", format="h:mm a"),
+                    "TimeStampEnd": st.column_config.DatetimeColumn("Waktu Keluar", format="h:mm a"),
+                },
+                hide_index = True,
+                use_container_width = True
+            )
+        
+            # st.dataframe(df) #-> uncomment for debugging   
+            
