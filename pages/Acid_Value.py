@@ -106,7 +106,7 @@ with tab1:
             st.write(f"Item Name: :red[{SecondItemNumber1}]")
             st.write(f"Second Item Number: :red[{ItemDescription1}]")
             st.write(f"LOT: :red[{LotSerialNumber1}]")
-
+            
 
             operator1 = st.text_input('Nama Operator', key="operator_tab1")
         

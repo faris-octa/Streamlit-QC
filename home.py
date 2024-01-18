@@ -11,9 +11,7 @@ st.set_page_config(
         This is an INKALI QC Calculator App
         \nAuthor : Faris Octa
         """
-    }
-
-)
+    })
 
 qc_conn = st.connection("qcdb", type="sql", autocommit=True)
 
@@ -129,8 +127,8 @@ elif qc_option == "Solid Content":
     )
 
     sampel_option_sc = st.selectbox(
-        'Nama Item',
-        df['ItemDescription'].unique().tolist(),
+        'SecondItemNumber',
+        df['SecondItemNumber'].unique().tolist(),
         index=None,
         placeholder="Pilih Item...",
         key = "sampel_option_sc"
@@ -139,7 +137,7 @@ elif qc_option == "Solid Content":
     if sampel_option_sc != None:
         lot_option_sc = st.selectbox(
             'Lot Number',
-            df.loc[df['ItemDescription'] == sampel_option_sc, 'LotSerialNumber'].unique().tolist(),
+            df.loc[df['SecondItemNumber'] == sampel_option_sc, 'LotSerialNumber'].unique().tolist(),
             index=None,
             placeholder="Pilih Lot...",
             key = "lot_option_sc"
@@ -147,7 +145,7 @@ elif qc_option == "Solid Content":
 
         if lot_option_sc != None:
             st.dataframe(
-                df.loc[(df['ItemDescription'] == sampel_option_sc) & (df['LotSerialNumber'] == lot_option_sc),
+                df.loc[(df['SecondItemNumber'] == sampel_option_sc) & (df['LotSerialNumber'] == lot_option_sc),
                 ["Metode", "SolidContent", "BeratWadah", "BeratSampelBasah", "BeratAkhir", "Status", "Operator1", "Operator2", "TimeStampInit", "TimeStampEnd"]
                 ],
                 column_config={

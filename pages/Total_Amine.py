@@ -51,7 +51,6 @@ st.write('Total Amine Calculator Page.')
 tab1, tab2 = st.tabs([f"Sampel Aktif ({len(ta_temp_df['Sampel'].unique())})", "Sampel Baru"])
 
 with tab1:
-
     sampel_option = st.selectbox(
         'Sampel',
         ta_temp_df['Sampel'].unique().tolist(),
@@ -151,7 +150,7 @@ with tab2:
         key = "option1"
     )
 
-    if option is not None:
+    if option != None:
         item = wo_df.loc[wo_df['OrderNumber'] == option].iloc[0]
         st.write(f"Item Name: :red[{item['ItemDescription']}]")
         st.write(f"Second Item Number: :red[{item['SecondItemNumber']}]")
