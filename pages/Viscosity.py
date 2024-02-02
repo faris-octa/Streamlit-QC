@@ -4,6 +4,17 @@ from sqlalchemy.sql import text
 import time
 import pandas as pd
 
+# # dataframe viscometer BL
+# BL_factor = {
+#     "speed": [0.3, 0.6, 1.5, 3, 6, 12, 30, 60, 0.3, 0.6, 1.5, 3, 6, 12, 30, 60, 0.3, 0.6, 1.5, 3, 6, 12, 30, 60, 0.3, 0.6, 1.5, 3, 6, 12, 30, 60],
+#     "spindle": [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4],
+#     "factor": [200, 100, 40, 20, 10, 5, 2, 1,
+#             1000, 500, 200, 100, 50, 25, 10, 5,
+#             4000, 2000, 800, 400, 200, 100, 40, 20,
+#             20000, 10000, 4000, 2000, 1000, 500, 200, 100], 1
+# }
+# BL_factor_df = pd.DataFrame(BL_factor)
+
 # dataframe viscometer BL
 BL_factor = {
     "speed": [0.3, 0.6, 1.5, 3, 6, 12, 30, 60, 0.3, 0.6, 1.5, 3, 6, 12, 30, 60, 0.3, 0.6, 1.5, 3, 6, 12, 30, 60, 0.3, 0.6, 1.5, 3, 6, 12, 30, 60],
@@ -56,6 +67,59 @@ tab1, tab2 = st.tabs([f"Sampel Aktif ({len(viscosity_temp_df['Sampel'].unique())
 with tab1:
     st.write("Under maintenance")
     st.dataframe(viscosity_temp_df)
+
+    sampel_option = st.selectbox(
+        'Sampel',
+        viscosity_temp_df['Sampel'].unique().tolist(),
+        index=None,
+        placeholder="Select Active Sample..." if len(viscosity_temp_df) > 0 else "Tidak Ada Sampel Aktif",
+        key = "sampel_option"
+        )
+    
+    if sampel_option != None:
+        with st.container(border=True):
+            displayed_df = viscosity_temp_df[(viscosity_temp_df['Sampel'] == sampel_option)].sort_values(by='TimeStamp', ascending=True)
+            
+            SecondItemNumber1 = displayed_df.iloc[0,1]
+            ItemDescription1 = displayed_df.iloc[0,2]
+            LotSerialNumber1 = displayed_df.iloc[0,3]
+
+            st.dataframe(
+                displayed_df[["ItemDescription", "LotSerialNumber", "Operator", "pHAtas", "pHBAwah", "ViscosityAtas", "ViscosityBawah", "Keterangan", "TimeStamp"]],
+                column_config={
+                    "ItemDescription": "Nama Item",
+                    "LotSerialNumber": "LOT",
+                    "TimeStamp": st.column_config.DatetimeColumn("Waktu", format="ddd, h:mm a")
+                },
+                hide_index = True,
+                use_container_width = True
+            )
+
+            # Save to viscosity database
+            if st.button('Selesai'):
+                st.write(displayed_df.iloc[:, 1:-1])
+                try:
+                    engine = create_engine("mysql+mysqldb://inkaliqc:qcoke@192.168.0.70/qc")
+                    displayed_df.iloc[:, 1:-1].to_sql('viscosity', con=engine, if_exists='append', index=False)
+                    with qc_conn.session as session:
+                        session.execute(text("""DELETE FROM viscositytemp 
+                                            WHERE SecondItemNumber = :n1 AND LotSerialNumber = :n2"""),
+                                            {"n1": SecondItemNumber1, "n2": LotSerialNumber1})
+                        st.success(f"Data sampel {sampel_option} telah berhasil masuk database.")
+                        time.sleep(2)
+                        st.cache_data.clear()
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")        
+
+
+
+
+
+
+
+
+
 
 with tab2:
     option = st.selectbox(

@@ -63,7 +63,7 @@ with tab1:
         key = "sampel_option2"
     )
 
-    if sampel_option is not None:
+    if sampel_option != None:
         with st.container(border=True):
             displayed_df = av_temp_df[(av_temp_df['Sampel'] == sampel_option)].sort_values(by='TimeStamp', ascending=True)
             
