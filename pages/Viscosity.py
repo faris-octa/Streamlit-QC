@@ -119,7 +119,7 @@ with tab2:
                 elif ((viscosity_temp_df['SecondItemNumber'] == item['SecondItemNumber']) & (viscosity_temp_df['LotSerialNumber'] == item['LotSerialNumber'])).any():
                     st.warning("Sampel sudah aktif")
                 else:
-                    st.write(item)
+                    # st.write(item) -> for debug
                     with qc_conn.session as session:
                         session.execute(text("""INSERT INTO viscositytemp (SecondItemNumber, ItemDescription, LotSerialNumber, Operator, ViscoType, pHAtas, SpindleAtas, SpeedAtas, DialAtas, ViscosityAtas, pHBawah, SpindleBawah, SpeedBawah, DialBawah, ViscosityBawah, Keterangan) 
                                                 VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, 
