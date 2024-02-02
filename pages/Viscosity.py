@@ -65,8 +65,7 @@ st.write('Viscosity Calculator Page.')
 tab1, tab2 = st.tabs([f"Sampel Aktif ({len(viscosity_temp_df['Sampel'].unique())})", "Sampel Baru"])
 
 with tab1:
-    st.write("Under maintenance")
-    st.dataframe(viscosity_temp_df)
+    # st.dataframe(viscosity_temp_df)  -> for debugging
 
     sampel_option = st.selectbox(
         'Sampel',
@@ -110,8 +109,69 @@ with tab1:
                         st.cache_data.clear()
                         st.rerun()
                 except Exception as e:
-                    st.error(f"An error occurred: {e}")        
+                    st.error(f"An error occurred: {e}")    
 
+
+        with st.container(border=True) as input_section:
+
+            operator1 = st.text_input('Nama Operator', value=None, key="operator1")
+            visco_type = st.selectbox(
+                'Viscometer Type',
+                ["BL", "BH"],
+                index=None,
+                placeholder="Select Viscometer type...",
+                key = "viscotype option"
+            )
+            
+            col_atas1, col_bawah1 = st.columns(2)
+            
+            with col_atas1:
+                st.write("Atas")
+
+                pH_atas = st.number_input("pH atas", format='%f', label_visibility="visible", placeholder= "", value=None)
+                spindle_atas = st.selectbox('tipe spindle', [1,2,3,4], index = None, placeholder= "", label_visibility="visible", key="spindle_atas")  
+                speed_atas = st.selectbox('kecepatan', BL_factor_df["speed"].unique().tolist(), index=None, placeholder= "", label_visibility="visible", key="speed_atas")
+                measurement_atas = st.number_input("pembacaan", format='%f', label_visibility="visible", placeholder= "(1-100)", value=None, key="measurement_atas")
+                if spindle_atas != None and speed_atas != None and measurement_atas != None:
+                    viscosity_atas = calculate_viscosity(spindle_atas, speed_atas, measurement_atas)
+                    st.write(f"Nilai viskositas Atas: {viscosity_atas}")
+                else:
+                    viscosity_atas = None
+
+            with col_bawah1:
+                st.write("Bawah")
+
+                pH_bawah = st.number_input("pH bawah", format='%f', label_visibility="visible", placeholder= "", value=None)
+                spindle_bawah = st.selectbox('tipe spindle', [1,2,3,4], index = None, placeholder= "", label_visibility="visible", key="spindle_bawah")  
+                speed_bawah = st.selectbox('kecepatan', BL_factor_df["speed"].unique().tolist(), index=None, placeholder= "", label_visibility="visible", key="speed_bawah")
+                measurement_bawah = st.number_input("pembacaan", format='%f', label_visibility="visible", placeholder= "(1-100)", value=None, key="measurement_bawah")
+                if spindle_bawah != None and speed_bawah != None and measurement_bawah != None:
+                    viscosity_bawah = calculate_viscosity(spindle_bawah, speed_bawah, measurement_bawah)
+                    st.write(f"Nilai viskositas bawah: {viscosity_bawah}")
+                else:
+                    viscosity_bawah = None
+
+            keterangan2 = st.text_input('Keterangan', value=None, key="keterangan")
+            if st.button('submit', use_container_width=True):
+                if operator1 == None:
+                    st.warning("Input Nama Operator")
+                else:
+                    # st.write(item) -> for debug
+                    with qc_conn.session as session:
+                        session.execute(text("""INSERT INTO viscositytemp (SecondItemNumber, ItemDescription, LotSerialNumber, Operator, ViscoType, pHAtas, SpindleAtas, SpeedAtas, DialAtas, ViscosityAtas, pHBawah, SpindleBawah, SpeedBawah, DialBawah, ViscosityBawah, Keterangan) 
+                                                VALUES (:n1, :n2, :n3, :n4, :n5, :n6, :n7, :n8, 
+                                                        :n9, :n10, :n11, :n12, :n13, :n14, :n15, :n16);"""),
+                                        {"n1":SecondItemNumber1, "n2":ItemDescription1, "n3":LotSerialNumber1, 
+                                        "n4":operator1.capitalize(), "n5": visco_type,
+                                        "n6": pH_atas, "n7":spindle_atas, "n8":speed_atas, "n9":measurement_atas, "n10":viscosity_atas, 
+                                        "n11": pH_bawah, "n12":spindle_bawah, "n13":speed_bawah, "n14":measurement_bawah, "n15":viscosity_bawah,
+                                        "n16":keterangan2
+                                        })  
+                    st.success('Input Data Success')
+                    time.sleep(2)
+                    st.cache_data.clear()
+                    del st.session_state["option1"]
+                    st.rerun()
 
 
 
