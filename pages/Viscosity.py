@@ -20,6 +20,9 @@ def calculate_viscosity(spindle, speed, measurement):
     viscosity = factor * measurement
     return viscosity
 
+# Filter Products
+products = ["NEOSTECKER HF-9113", "NEOSTECKER HF-9189", "NEOSTECKER HF-9119", "NEOSTECKER HF-920"]
+
 # CONNECTION SETTINGS
 wo_conn = st.connection("prodDB", type="sql", autocommit=True)
 qc_conn = st.connection("qcdb", type="sql", autocommit=True)
@@ -30,7 +33,9 @@ wo_df = wo_conn.query(
     "SELECT * FROM workorder where IsActive = 1 AND SecondItemNumber NOT LIKE '%-%'",
     show_spinner = True, 
     ttl=10
-    )           
+    )  
+
+wo_df = wo_df[wo_df['ItemDescription'].isin(products)]         
 
 viscosity_temp_df = qc_conn.query(
     "select * from viscositytemp", 
